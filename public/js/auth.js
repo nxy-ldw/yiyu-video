@@ -167,7 +167,7 @@ function showMaintenanceOverlay(msg) {
       escapeHtml(msg || '一屿视频正在进行升级维护，我们正在努力为您提供更好的服务。请稍后再来访问。') +
     '</p>' +
     '<button onclick="location.reload()" style="padding:12px 28px;border:none;border-radius:12px;background:linear-gradient(135deg,#ff6b6b,#ff8e8e);color:#fff;font-size:15px;font-weight:600;box-shadow:0 8px 24px rgba(255,107,107,0.35);cursor:pointer;">🔄 重新加载</button>' +
-    '<div style="margin-top:40px;font-size:12px;opacity:0.5;">一屿视频 V4.0 · 作者：一屿</div>' +
+    '<div style="margin-top:40px;font-size:12px;opacity:0.5;">一屿视频 V4.3 · 作者：一屿</div>' +
     '</div>';
 }
 
@@ -1196,7 +1196,7 @@ function logRuntimeInfo() {
     var info = [
       '',
       '======================================',
-      '  一屿视频 V4.0 · 作者：一屿',
+      '  一屿视频 V4.3 · 作者：一屿',
       '  Auth 模块加载完成',
       '======================================',
       '  环境: ' + (authState.isWebView ? 'WebView App' : 'Browser'),

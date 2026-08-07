@@ -1366,7 +1366,7 @@ function showSettingModal() {
     '<div style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:14px;">' +
     '<button class="auth-submit-btn" onclick="clearAppCache()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#f0f0f0;color:#333;font-size:14px;font-weight:600;margin-bottom:14px;">🗑️ 清除缓存</button>' +
     '<div class="setting-version-info" style="text-align:center;padding:12px 0 0;border-top:1px dashed #eee;">' +
-    '<div style="font-size:13px;color:#999;">版本号 V4.0 · 作者：一屿</div>' +
+    '<div style="font-size:13px;color:#999;">版本号 V4.3 · 作者：一屿</div>' +
     '<div style="font-size:11px;color:#bbb;margin-top:4px;">© 2026 一屿视频 All Rights Reserved</div>' +
     '</div></div>';
   if (body) body.insertAdjacentHTML('beforeend', infoHtml);

@@ -62,9 +62,27 @@ function initDB() {
     writeJSON('settings', {
       maintenanceMode: false,
       appName: '一屿视频',
-      appVersion: '3.0.0',
+      appVersion: '4.3.0',
+      appVersionName: 'V4.3',
+      appVersionCode: 43,
+      appPackageName: 'yiyu-video-v4.3.apk',
       allowRegistration: true
     });
+  } else {
+    const oldVersions = ['3.0.0', '4.0.0', 'V4.0'];
+    if (!settings.appVersion || oldVersions.includes(settings.appVersion)) {
+      settings.appVersion = '4.3.0';
+    }
+    if (!settings.appVersionName || oldVersions.includes(settings.appVersionName)) {
+      settings.appVersionName = 'V4.3';
+    }
+    if (!settings.appVersionCode || Number(settings.appVersionCode) < 43) {
+      settings.appVersionCode = 43;
+    }
+    if (!settings.appPackageName) {
+      settings.appPackageName = 'yiyu-video-v4.3.apk';
+    }
+    writeJSON('settings', settings);
   }
 
   const announcements = readJSON('announcements', null);

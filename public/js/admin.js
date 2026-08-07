@@ -1,5 +1,5 @@
 /* ============================================
-   一屿视频管理后台 V4.0 - 主逻辑
+   一屿视频管理后台 V4.3 - 主逻辑
    全部原生JS ES5兼容 (var/function)
    ============================================ */
 
@@ -18,9 +18,15 @@ function adminRequest(url, options) {
   if (adminToken) {
     headers['Authorization'] = 'Bearer ' + adminToken;
   }
-  return fetch(getApiUrl(url), {
-    method: options.method || 'GET',
+  var method = options.method || 'GET';
+  var requestUrl = getApiUrl(url);
+  if (method === 'GET') {
+    requestUrl += (requestUrl.indexOf('?') > -1 ? '&' : '?') + '_t=' + Date.now();
+  }
+  return fetch(requestUrl, {
+    method: method,
     headers: headers,
+    cache: 'no-store',
     body: options.body ? JSON.stringify(options.body) : undefined
   }).then(function(r) { return r.json(); });
 }
@@ -288,9 +294,11 @@ function adminShowUsers(page) {
     var rows = list.map(function(u) {
       var lv = u.level || 1;
       var lvTag = '<span class="tag tag-level-' + Math.min(4, Math.max(1, lv)) + '">Lv.' + lv + '</span>';
-      var vipTag = (u.isVip || u.vip) ? '<span class="tag tag-vip">' +
-        ((u.vipExpireAt && new Date(u.vipExpireAt).getTime() > Date.now()) ?
-         'VIP至 ' + formatTime(u.vipExpireAt).slice(0, 10) : 'VIP') + '</span>' : '<span class="tag tag-vip-off">非VIP</span>';
+      var vipOn = !!(u.isVip || u.vip);
+      var vipActive = u.vipActive !== undefined ? !!u.vipActive : (vipOn && (!u.vipExpireAt || new Date(u.vipExpireAt).getTime() > Date.now()));
+      var vipTag = vipOn ? '<span class="tag tag-vip">' +
+        (vipActive ? ((u.vipExpireAt && new Date(u.vipExpireAt).getTime() > Date.now()) ?
+         'VIP至 ' + formatTime(u.vipExpireAt).slice(0, 10) : '永久VIP') : 'VIP已过期') + '</span>' : '<span class="tag tag-vip-off">非VIP</span>';
       var banBtn = (u.isBanned ? '<button class="btn btn-sm btn-success" onclick="adminUserToggleBan(\'' + u.id + '\',false)">解封</button>'
                                 : '<button class="btn btn-sm btn-warn" onclick="adminUserToggleBan(\'' + u.id + '\',true)">封禁</button>');
       return '' +
@@ -921,7 +929,7 @@ function adminShowServer() {
         '<div class="info-grid">' +
           '<div class="info-item"><div class="info-label">运行状态</div><div class="info-value" style="color:#10ac84;">✓ 运行中</div></div>' +
           '<div class="info-item"><div class="info-label">监听端口</div><div class="info-value">' + escapeHtml(s.port || processEnvPort() || '默认') + '</div></div>' +
-          '<div class="info-item"><div class="info-label">系统版本</div><div class="info-value">' + escapeHtml(s.appVersion || s.version || 'V4.0.0') + '</div></div>' +
+          '<div class="info-item"><div class="info-label">系统版本</div><div class="info-value">' + escapeHtml(s.appVersion || s.version || '4.3.0') + '</div></div>' +
           '<div class="info-item"><div class="info-label">应用名称</div><div class="info-value">' + escapeHtml(s.appName || '一屿视频') + '</div></div>' +
           '<div class="info-item"><div class="info-label">作者信息</div><div class="info-value">一屿视频团队</div></div>' +
           '<div class="info-item"><div class="info-label">维护模式</div><div class="info-value" style="color:' + (s.maintenanceMode ? '#ee5253' : '#10ac84') + ';">' + (s.maintenanceMode ? '🔴 开启' : '🟢 关闭') + '</div></div>' +
@@ -982,7 +990,7 @@ function adminShowSettings() {
       '<div class="form-group"><label class="form-label">应用名称</label>' +
         '<input type="text" id="set-appname" class="form-input" value="' + escapeHtml(s.appName || '一屿视频') + '"></div>' +
       '<div class="form-group"><label class="form-label">版本号</label>' +
-        '<input type="text" id="set-version" class="form-input" value="' + escapeHtml(s.appVersion || s.version || '4.0.0') + '"></div>' +
+        '<input type="text" id="set-version" class="form-input" value="' + escapeHtml(s.appVersion || s.version || '4.3.0') + '"></div>' +
       '<div class="toggle-line"><div class="toggle-text"><div class="tt-name">允许注册新账号</div><div class="tt-desc">关闭后用户端注册入口将失效</div></div>' +
         '<label class="adv-switch blue"><input type="checkbox" id="set-register" ' + (s.allowRegistration !== false ? 'checked' : '') + '><span class="adv-slider"></span></label>' +
       '</div>' +

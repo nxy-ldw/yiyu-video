@@ -1,0 +1,43 @@
+# ========== 一屿视频 .gitignore ==========
+# Node 依赖
+node_modules/
+server/node_modules/
+
+# APK 构建产物
+*.apk
+一屿视频*.apk
+app-debug*.apk
+!public/downloads/
+!public/downloads/yiyu-video-v4.3.apk
+
+# Android 构建
+android/.gradle/
+android/build/
+android/app/build/
+android/app/release/
+android/captures/
+android/local.properties
+android/.idea/
+*.iml
+
+# 构建工具缓存 (体积巨大)
+build-tools/
+
+# 临时
+*.log
+.DS_Store
+__MACOSX
+Thumbs.db
+*.tmp
+
+# 服务器本地数据 (可在 Railway 用/data卷持久化)
+server/data/*.json
+!server/data/.gitkeep
+
+# Logo 临时生成
+_logo_output/
+_logo_server.js
+logo-generator.html
+
+# 其他
+.railway/

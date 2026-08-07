@@ -10,10 +10,29 @@ db.initDB();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const LATEST_APP_VERSION = '4.3.0';
+const LATEST_APP_VERSION_NAME = 'V4.3';
+const LATEST_APP_VERSION_CODE = 43;
+const LATEST_APP_PACKAGE = 'yiyu-video-v4.3.apk';
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
+app.use((req, res, next) => {
+  if (
+    req.path === '/admin' ||
+    req.path === '/admin.html' ||
+    req.path === '/js/admin.js' ||
+    req.path === '/js/config.js' ||
+    req.path === '/css/admin.css'
+  ) {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.set('Surrogate-Control', 'no-store');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, '../public')));
 
 // ============== 默认数据源 ==============
@@ -111,6 +130,53 @@ function isToday(dateStr) {
   return d.toDateString() === now.toDateString();
 }
 
+function getBaseUrl(req) {
+  const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+  const host = req.headers['x-forwarded-host'] || req.headers.host;
+  return `${proto}://${host}`;
+}
+
+function normalizeVersion(v) {
+  return String(v || '0').replace(/^v/i, '').split('.').map(n => {
+    const x = parseInt(n, 10);
+    return isNaN(x) ? 0 : x;
+  });
+}
+
+function compareVersion(a, b) {
+  const av = normalizeVersion(a);
+  const bv = normalizeVersion(b);
+  const len = Math.max(av.length, bv.length, 3);
+  for (let i = 0; i < len; i++) {
+    const x = av[i] || 0;
+    const y = bv[i] || 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+  }
+  return 0;
+}
+
+function getLatestAppInfo(req) {
+  const settings = db.readJSON('settings', {});
+  const version = settings.appVersion || LATEST_APP_VERSION;
+  const versionName = settings.appVersionName || `V${version.replace(/\.0$/, '')}`;
+  const versionCode = Number(settings.appVersionCode || LATEST_APP_VERSION_CODE);
+  const packageName = settings.appPackageName || LATEST_APP_PACKAGE;
+  const baseUrl = getBaseUrl(req);
+  return {
+    appName: settings.appName || '一屿视频',
+    version,
+    versionName,
+    versionCode,
+    packageName,
+    downloadUrl: `${baseUrl}/downloads/${encodeURIComponent(packageName)}`,
+    downloadPageUrl: `${baseUrl}/download`,
+    forceUpdate: !!settings.forceUpdate,
+    releaseNotes: settings.releaseNotes || '统一 V4.3 版本，修复后台版本显示与用户安装包更新问题。',
+    publishedAt: settings.publishedAt || '2026-08-08'
+  };
+}
+
 // ============== VIP 真实活跃判定（解决后台和前端显示不一致的问题） ==============
 // 规则：
 //  - isVip=true 且 vipExpireAt 为空/null/undefined → 永久VIP（有效）
@@ -188,12 +254,57 @@ function levelToLabel(lv, isAdmin) {
 // ============== 状态接口 ==============
 app.get('/api/status', (req, res) => {
   const settings = db.readJSON('settings', {});
+  const latest = getLatestAppInfo(req);
   res.json({ code: 0, data: {
     maintenance: settings.maintenanceMode || false,
     appName: settings.appName || '一屿视频',
-    appVersion: settings.appVersion || '4.4.0',
+    appVersion: latest.version,
+    appVersionName: latest.versionName,
+    appVersionCode: latest.versionCode,
+    downloadUrl: latest.downloadUrl,
     author: '一屿'
   }});
+});
+
+// ============== App 版本与更新接口 ==============
+app.get('/api/app/latest', (req, res) => {
+  res.json({ code: 0, data: getLatestAppInfo(req) });
+});
+
+app.get('/api/version', (req, res) => {
+  res.json({ code: 0, data: getLatestAppInfo(req) });
+});
+
+app.get('/api/app/version', (req, res) => {
+  res.json({ code: 0, data: getLatestAppInfo(req) });
+});
+
+app.get('/api/update/check', (req, res) => {
+  const latest = getLatestAppInfo(req);
+  const currentVersion = req.query.version || req.query.appVersion || '0.0.0';
+  const currentCode = parseInt(req.query.versionCode || req.query.code || '0', 10) || 0;
+  const needUpdate = currentCode > 0
+    ? currentCode < latest.versionCode
+    : compareVersion(currentVersion, latest.version) < 0;
+  res.json({
+    code: 0,
+    data: {
+      needUpdate,
+      hasUpdate: needUpdate,
+      currentVersion,
+      latestVersion: latest.version,
+      latestVersionName: latest.versionName,
+      latestVersionCode: latest.versionCode,
+      forceUpdate: latest.forceUpdate,
+      downloadUrl: latest.downloadUrl,
+      releaseNotes: latest.releaseNotes,
+      publishedAt: latest.publishedAt
+    }
+  });
+});
+
+app.get('/api/download', (req, res) => {
+  res.json({ code: 0, data: getLatestAppInfo(req) });
 });
 
 // ============== 广告接口（首页Banner、我的页面广告） ==============
@@ -965,9 +1076,21 @@ app.get('/api/admin/users', adminMiddleware, (req, res) => {
   const total = users.length;
   const start = (page - 1) * limit;
   const list = users.slice(start, start + parseInt(limit)).map(u => ({
-    id: u.id, username: u.username, phone: u.phone, qq: u.qq,
-    level: u.level, isVip: !!u.isVip, vipExpireAt: u.vipExpireAt,
-    isBanned: u.isBanned, createdAt: u.createdAt
+    id: u.id,
+    username: u.username,
+    nickname: u.nickname || '',
+    phone: u.phone,
+    qq: u.qq,
+    level: normalizeLevel(u.level),
+    levelLabel: levelToLabel(u.level, !!u.isAdmin),
+    isVip: !!u.isVip,
+    vipActive: isVipActive(u),
+    vipDaysLeft: vipDaysLeft(u),
+    vipExpireAt: u.vipExpireAt,
+    vipLevel: parseInt(u.vipLevel, 10) || 0,
+    isBanned: u.isBanned,
+    isAdmin: !!u.isAdmin,
+    createdAt: u.createdAt
   }));
   res.json({ code: 0, data: { list, total, page: parseInt(page), limit: parseInt(limit) } });
 });
@@ -990,6 +1113,7 @@ app.put('/api/admin/users/:id', adminMiddleware, (req, res) => {
   if (phone !== undefined) {
     const p = (phone || '').toString().trim();
     if (p && !/^[0-9\-+ ]{5,20}$/.test(p)) return res.json({ code: 1, message: '手机号格式不正确（5-20位数字或+ - 空格）' });
+    if (p && users.some(u => u.id !== id && u.phone === p)) return res.json({ code: 1, message: '手机号已被其他用户使用' });
     setField('phone', p || null, '手机号');
   }
   if (qq !== undefined) {
@@ -1162,6 +1286,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/admin.html'));
 });
 
+app.get('/download', (req, res) => {
+  const latest = getLatestAppInfo(req);
+  res.redirect(latest.downloadUrl);
+});
+
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ code: 404, message: '接口不存在' });
@@ -1172,7 +1301,7 @@ app.get('*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log('========================================');
   console.log('');
-  console.log('   一屿视频 V4.0 服务器启动成功！');
+  console.log('   一屿视频 V4.3 服务器启动成功！');
   console.log('   作者：一屿文化工作室');
   console.log('');
   console.log(`   端口: ${PORT}`);
