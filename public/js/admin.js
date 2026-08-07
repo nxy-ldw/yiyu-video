@@ -281,6 +281,7 @@ function renderSimpleTable(heads, rows) {
 
 var usersPage = 1;
 var usersKeyword = '';
+var adminUserMap = {};
 
 function adminShowUsers(page) {
   if (typeof page === 'number') usersPage = page;
@@ -291,7 +292,9 @@ function adminShowUsers(page) {
     if (res.code !== 0) { c.innerHTML = '<div class="card" style="color:#ee5253">' + escapeHtml(res.message || '加载失败') + '</div>'; return; }
     var d = res.data || {};
     var list = d.list || [];
+    adminUserMap = {};
     var rows = list.map(function(u) {
+      adminUserMap[u.id] = u;
       var lv = u.level || 1;
       var lvTag = '<span class="tag tag-level-' + Math.min(4, Math.max(1, lv)) + '">Lv.' + lv + '</span>';
       var vipOn = !!(u.isVip || u.vip);
@@ -310,9 +313,9 @@ function adminShowUsers(page) {
         '<td>' + vipTag + '</td>' +
         '<td>' + formatTime(u.createdAt) + '</td>' +
         '<td class="action-group">' +
-          '<button class="btn btn-sm btn-primary" onclick=\'adminEditUser(' + JSON.stringify(u).replace(/'/g, "&#39;") + ')\">编辑</button>' +
+          '<button class="btn btn-sm btn-primary" onclick="adminEditUserById(\'' + escapeHtml(u.id) + '\')">编辑</button>' +
           banBtn +
-          '<button class="btn btn-sm btn-danger" onclick="adminDeleteUser(\'' + u.id + '\',\'' + escapeHtml(u.username || '') + '\')">删除</button>' +
+          '<button class="btn btn-sm btn-danger" onclick="adminDeleteUserById(\'' + escapeHtml(u.id) + '\')">删除</button>' +
         '</td>';
     });
     c.innerHTML = '' +
@@ -329,6 +332,16 @@ function adminShowUsers(page) {
     var pg = document.createElement('div'); pg.id = 'users-pg'; c.appendChild(pg);
     if (d.total > 0) renderPagination(pg, usersPage, d.total, 20, function(p) { adminShowUsers(p); });
   });
+}
+
+function adminEditUserById(id) {
+  var u = adminUserMap[id];
+  if (!u) {
+    adminToast('用户数据已过期，请刷新用户列表后再试', 'error');
+    adminShowUsers();
+    return;
+  }
+  adminEditUser(u);
 }
 
 function adminEditUser(u) {
@@ -468,6 +481,11 @@ function adminEditUser(u) {
       }
     });
   });
+}
+
+function adminDeleteUserById(id) {
+  var u = adminUserMap[id] || {};
+  adminDeleteUser(id, u.username || '该用户');
 }
 
 function adminUserToggleBan(id, ban) {
