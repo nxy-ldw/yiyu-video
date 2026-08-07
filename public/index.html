@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ff6b6b">
+  <title>一屿视频 - 发现精彩</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ==================== 首页 ==================== -->
+    <div class="page active" id="page-home">
+      <header class="home-header">
+        <div class="logo-row">
+          <div class="logo-left">
+            <div class="logo-img">🎬</div>
+            <span class="app-name">一屿视频</span>
+          </div>
+          <div class="header-avatar" onclick="switchTab('mine')">👤</div>
+        </div>
+        <div class="announcement-bar">
+          <span class="announcement-icon">📢</span>
+          <div class="announcement-text">
+            <span>欢迎使用一屿视频 · 每日更新海量影视资源 · 服务器已自动连接至 Railway 云端</span>
+          </div>
+        </div>
+        <div class="search-box" onclick="showSearchModal()">
+          <span class="search-box-icon">🔍</span>
+          <span class="search-box-text">搜索电影、电视剧、动漫、综艺...</span>
+        </div>
+      </header>
+
+      <div class="banner-container">
+        <div class="banner-slider" id="banner-slider">
+          <div class="banner-item active" onclick="openDetail(1)">
+            <img src="https://picsum.photos/seed/banner1/800/200" alt="">
+            <div class="banner-overlay"><div class="banner-title">🔥 庆余年 第三季 全网热播</div></div>
+          </div>
+          <div class="banner-item" onclick="openDetail(2)">
+            <img src="https://picsum.photos/seed/banner2/800/200" alt="">
+            <div class="banner-overlay"><div class="banner-title">🎬 2026春节档大片独家上线</div></div>
+          </div>
+          <div class="banner-item" onclick="openDetail(3)">
+            <img src="https://picsum.photos/seed/banner3/800/200" alt="">
+            <div class="banner-overlay"><div class="banner-title">⚡ 海贼王最新动画 抢先看</div></div>
+          </div>
+        </div>
+        <div class="banner-dots" id="banner-dots">
+          <span class="banner-dot active"></span>
+          <span class="banner-dot"></span>
+          <span class="banner-dot"></span>
+        </div>
+      </div>
+
+      <div class="sections">
+        <section class="section" id="sec-new">
+          <div class="section-header">
+            <h3 class="section-title">推荐新剧</h3>
+            <span class="section-more" onclick="filterJump('tv')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-new"></div>
+        </section>
+
+        <section class="section" id="sec-foreign">
+          <div class="section-header">
+            <h3 class="section-title">国外热映</h3>
+            <span class="section-more" onclick="filterJump('movie')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-foreign"></div>
+        </section>
+
+        <section class="section" id="sec-tv">
+          <div class="section-header">
+            <h3 class="section-title">电视剧</h3>
+            <span class="section-more" onclick="filterJump('tv')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-tv"></div>
+        </section>
+
+        <section class="section" id="sec-movie">
+          <div class="section-header">
+            <h3 class="section-title">电影</h3>
+            <span class="section-more" onclick="filterJump('movie')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-movie"></div>
+        </section>
+
+        <section class="section" id="sec-variety">
+          <div class="section-header">
+            <h3 class="section-title">综艺</h3>
+            <span class="section-more" onclick="filterJump('variety')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-variety"></div>
+        </section>
+
+        <section class="section" id="sec-anime">
+          <div class="section-header">
+            <h3 class="section-title">动漫</h3>
+            <span class="section-more" onclick="filterJump('anime')">更多 ›</span>
+          </div>
+          <div class="scroll-row" id="row-anime"></div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ==================== 筛选页 ==================== -->
+    <div class="page" id="page-filter">
+      <header class="filter-header">
+        <div class="filter-header-title">筛选</div>
+      </header>
+      <div class="filter-tabs-container">
+        <div class="filter-tabs-row">
+          <span class="filter-label">类型</span>
+          <span class="filter-chip active" data-filter="type" data-value="">全部</span>
+          <span class="filter-chip" data-filter="type" data-value="连续剧">连续剧</span>
+          <span class="filter-chip" data-filter="type" data-value="电影">电影</span>
+          <span class="filter-chip" data-filter="type" data-value="综艺">综艺</span>
+          <span class="filter-chip" data-filter="type" data-value="动漫">动漫</span>
+          <span class="filter-chip" data-filter="type" data-value="短剧">短剧</span>
+        </div>
+        <div class="filter-tabs-row">
+          <span class="filter-label">题材</span>
+          <span class="filter-chip active" data-filter="genre" data-value="">全部</span>
+          <span class="filter-chip" data-filter="genre" data-value="爱情">爱情</span>
+          <span class="filter-chip" data-filter="genre" data-value="喜剧">喜剧</span>
+          <span class="filter-chip" data-filter="genre" data-value="悬疑">悬疑</span>
+          <span class="filter-chip" data-filter="genre" data-value="犯罪">犯罪</span>
+          <span class="filter-chip" data-filter="genre" data-value="古装">古装</span>
+          <span class="filter-chip" data-filter="genre" data-value="动作">动作</span>
+          <span class="filter-chip" data-filter="genre" data-value="科幻">科幻</span>
+          <span class="filter-chip" data-filter="genre" data-value="恐怖">恐怖</span>
+          <span class="filter-chip" data-filter="genre" data-value="剧情">剧情</span>
+          <span class="filter-chip" data-filter="genre" data-value="战争">战争</span>
+          <span class="filter-chip" data-filter="genre" data-value="家庭">家庭</span>
+          <span class="filter-chip" data-filter="genre" data-value="奇幻">奇幻</span>
+          <span class="filter-chip" data-filter="genre" data-value="动画">动画</span>
+          <span class="filter-chip" data-filter="genre" data-value="武侠">武侠</span>
+          <span class="filter-chip" data-filter="genre" data-value="历史">历史</span>
+          <span class="filter-chip" data-filter="genre" data-value="惊悚">惊悚</span>
+          <span class="filter-chip" data-filter="genre" data-value="冒险">冒险</span>
+        </div>
+        <div class="filter-tabs-row">
+          <span class="filter-label">地区</span>
+          <span class="filter-chip active" data-filter="region" data-value="">全部</span>
+          <span class="filter-chip" data-filter="region" data-value="内地">内地</span>
+          <span class="filter-chip" data-filter="region" data-value="香港">香港</span>
+          <span class="filter-chip" data-filter="region" data-value="台湾">台湾</span>
+          <span class="filter-chip" data-filter="region" data-value="美国">美国</span>
+          <span class="filter-chip" data-filter="region" data-value="韩国">韩国</span>
+          <span class="filter-chip" data-filter="region" data-value="日本">日本</span>
+          <span class="filter-chip" data-filter="region" data-value="欧美">欧美</span>
+          <span class="filter-chip" data-filter="region" data-value="英国">英国</span>
+          <span class="filter-chip" data-filter="region" data-value="泰国">泰国</span>
+          <span class="filter-chip" data-filter="region" data-value="印度">印度</span>
+          <span class="filter-chip" data-filter="region" data-value="其他">其他</span>
+        </div>
+        <div class="filter-tabs-row">
+          <span class="filter-label">年份</span>
+          <span class="filter-chip active" data-filter="year" data-value="">全部</span>
+          <span class="filter-chip" data-filter="year" data-value="2026">2026</span>
+          <span class="filter-chip" data-filter="year" data-value="2025">2025</span>
+          <span class="filter-chip" data-filter="year" data-value="2024">2024</span>
+          <span class="filter-chip" data-filter="year" data-value="2023">2023</span>
+          <span class="filter-chip" data-filter="year" data-value="2022">2022</span>
+          <span class="filter-chip" data-filter="year" data-value="2021">2021</span>
+          <span class="filter-chip" data-filter="year" data-value="2020">2020</span>
+          <span class="filter-chip" data-filter="year" data-value="2010s">2010-2019</span>
+          <span class="filter-chip" data-filter="year" data-value="old">更早</span>
+        </div>
+        <div class="filter-tabs-row">
+          <span class="filter-label">排序</span>
+          <span class="filter-chip active" data-filter="sort" data-value="hot">最热</span>
+          <span class="filter-chip" data-filter="sort" data-value="score">评分</span>
+          <span class="filter-chip" data-filter="sort" data-value="new">最新上线</span>
+        </div>
+      </div>
+      <div class="grid-list" id="filter-grid"></div>
+    </div>
+
+    <!-- ==================== 排行榜页 ==================== -->
+    <div class="page" id="page-rank">
+      <header class="rank-header">
+        <div class="rank-header-title">排行榜</div>
+      </header>
+      <div class="rank-tabs" id="rank-tabs">
+        <div class="rank-tab active" data-rank="hot">热播</div>
+        <div class="rank-tab" data-rank="rising">飙升</div>
+        <div class="rank-tab" data-rank="search">热搜</div>
+        <div class="rank-tab" data-rank="new">新片</div>
+        <div class="rank-tab" data-rank="tv">电视剧</div>
+        <div class="rank-tab" data-rank="movie">电影</div>
+        <div class="rank-tab" data-rank="anime">动漫</div>
+      </div>
+      <div class="rank-list" id="rank-list"></div>
+    </div>
+
+    <!-- ==================== 我的页面 ==================== -->
+    <div class="page" id="page-mine">
+      <div class="user-card">
+        <div class="user-info-row">
+          <div class="mine-avatar">👤</div>
+          <div class="mine-user-info">
+            <div class="mine-username-row">
+              <span class="mine-username" id="mine-username">一屿用户</span>
+              <span class="vip-badge">VIP</span>
+            </div>
+            <div class="mine-level">⭐ Lv.3 影视达人</div>
+            <div class="mine-phone" id="mine-phone">138****8888</div>
+          </div>
+          <button class="edit-profile-btn" onclick="showToast('编辑资料开发中')">编辑资料</button>
+        </div>
+      </div>
+
+      <div class="mine-ad-banner">🎁 VIP会员限时优惠 - 首月仅需9.9元</div>
+
+      <div class="menu-list">
+        <div class="menu-group">
+          <div class="menu-item" onclick="showToast('历史观看开发中')">
+            <span class="menu-icon">⏱️</span>
+            <span class="menu-text">历史观看</span>
+            <span class="menu-badge" style="display:none;">12</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="showToast('我的收藏开发中')">
+            <span class="menu-icon">⭐</span>
+            <span class="menu-text">我的收藏</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="showToast('我的下载开发中')">
+            <span class="menu-icon">📥</span>
+            <span class="menu-text">我的下载</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="showToast('意见反馈开发中')">
+            <span class="menu-icon">📝</span>
+            <span class="menu-text">意见反馈</span>
+            <span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item" onclick="showSettingModal()">
+            <span class="menu-icon">⚙️</span>
+            <span class="menu-text">设置</span>
+            <span class="menu-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 详情页 模态（全屏从右推入） ==================== -->
+    <div id="page-detail">
+      <div class="detail-header">
+        <div class="detail-back-btn" onclick="closeDetail()">‹</div>
+        <div class="detail-cover-big">
+          <img id="detail-cover-img" src="https://picsum.photos/seed/detail1/800/450" alt="">
+          <div class="play-cover-btn" onclick="openPlayerFromDetail()">▶</div>
+        </div>
+      </div>
+      <div class="detail-content">
+        <div class="detail-title-row">
+          <h1 class="detail-title" id="detail-title">庆余年 第三季</h1>
+          <div class="detail-score-big">
+            <div class="detail-score-num" id="detail-score">9.5</div>
+            <div class="detail-score-label">评分</div>
+          </div>
+        </div>
+        <div class="detail-tags" id="detail-tags">
+          <span class="detail-tag">剧情</span>
+          <span class="detail-tag">古装</span>
+          <span class="detail-tag">内地</span>
+          <span class="detail-tag">2026</span>
+        </div>
+        <div class="detail-actions">
+          <button class="detail-action-btn" id="detail-fav-btn" onclick="toggleFav()">
+            <span class="detail-action-icon">⭐</span>
+            <span>收藏</span>
+          </button>
+          <button class="detail-action-btn" onclick="shareVideo()">
+            <span class="detail-action-icon">📤</span>
+            <span>分享</span>
+          </button>
+          <button class="detail-action-btn" onclick="showToast('开始下载')">
+            <span class="detail-action-icon">📥</span>
+            <span>下载</span>
+          </button>
+        </div>
+
+        <div class="detail-section">
+          <h4 class="detail-section-title">简介</h4>
+          <div class="detail-desc-box">
+            <div class="detail-desc" id="detail-desc">
+              范闲因五竹突破重伤昏迷进入梦境，梦到自己在现代和朋友聚餐续写《红楼梦》。梦醒后，范闲发现自己被悬空吊在一间草屋房梁上。王启年潜入使团准备营救范闲，却被影子大人暗中拦下，导致使团计划失败。另一边，庆帝通过洪竹得知三皇子在弘文馆的事，随后在朝堂上以三皇子李承平代太子设宴为由，将其禁足于太学反省思过……
+            </div>
+            <div class="detail-desc-expand" onclick="toggleDesc()">展开全部 ▼</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4 class="detail-section-title">演员表</h4>
+          <div class="cast-list">
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast1/100/100" alt=""></div>
+              <div class="cast-name">张若昀</div>
+              <div class="cast-role">饰 范闲</div>
+            </div>
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast2/100/100" alt=""></div>
+              <div class="cast-name">李沁</div>
+              <div class="cast-role">饰 林婉儿</div>
+            </div>
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast3/100/100" alt=""></div>
+              <div class="cast-name">陈道明</div>
+              <div class="cast-role">饰 庆帝</div>
+            </div>
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast4/100/100" alt=""></div>
+              <div class="cast-name">吴刚</div>
+              <div class="cast-role">饰 陈萍萍</div>
+            </div>
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast5/100/100" alt=""></div>
+              <div class="cast-name">田雨</div>
+              <div class="cast-role">饰 王启年</div>
+            </div>
+            <div class="cast-item">
+              <div class="cast-avatar"><img src="https://picsum.photos/seed/cast6/100/100" alt=""></div>
+              <div class="cast-name">宋轶</div>
+              <div class="cast-role">饰 范若若</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4 class="detail-section-title">播放线路</h4>
+          <div class="line-tabs" id="detail-line-tabs">
+            <div class="line-tab active">线路1</div>
+            <div class="line-tab">线路2</div>
+            <div class="line-tab">线路3</div>
+            <div class="line-tab">线路4</div>
+          </div>
+          <div class="episode-grid" id="detail-episodes">
+            <div class="episode-item active">第1集</div>
+            <div class="episode-item">第2集</div>
+            <div class="episode-item">第3集</div>
+            <div class="episode-item">第4集</div>
+            <div class="episode-item">第5集</div>
+            <div class="episode-item">第6集</div>
+            <div class="episode-item">第7集</div>
+            <div class="episode-item">第8集</div>
+            <div class="episode-item">第9集</div>
+            <div class="episode-item">第10集</div>
+            <div class="episode-item">第11集</div>
+            <div class="episode-item">第12集</div>
+            <div class="episode-item">第13集</div>
+            <div class="episode-item">第14集</div>
+            <div class="episode-item">第15集</div>
+            <div class="episode-item">第16集</div>
+            <div class="episode-item">第17集</div>
+            <div class="episode-item">第18集</div>
+            <div class="episode-item">第19集</div>
+            <div class="episode-item">第20集</div>
+            <div class="episode-item">第21集</div>
+            <div class="episode-item">第22集</div>
+            <div class="episode-item">第23集</div>
+            <div class="episode-item">第24集</div>
+            <div class="episode-item">第25集</div>
+            <div class="episode-item">第26集</div>
+            <div class="episode-item">第27集</div>
+            <div class="episode-item">第28集</div>
+            <div class="episode-item">第29集</div>
+            <div class="episode-item">第30集</div>
+            <div class="episode-item">第31集</div>
+            <div class="episode-item">第32集</div>
+            <div class="episode-item">第33集</div>
+            <div class="episode-item">第34集</div>
+            <div class="episode-item">第35集</div>
+            <div class="episode-item">第36集</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 播放页（全屏） ==================== -->
+    <div id="page-player">
+      <div class="player-wrapper">
+        <div class="player-video-wrap">
+          <div class="player-top-bar">
+            <div class="player-back-btn" onclick="closePlayer()">‹</div>
+            <div class="player-title" id="player-title">庆余年 第三季 第1集</div>
+          </div>
+          <video id="main-video-player" playsinline webkit-playsinline x5-playsinline></video>
+          <div class="player-bottom-controls">
+            <div class="player-progress-row">
+              <span class="player-time" id="player-cur-time">00:00</span>
+              <div class="player-progress-bar">
+                <div class="player-progress-fill" id="player-progress-fill"></div>
+              </div>
+              <span class="player-time" id="player-total-time">45:00</span>
+            </div>
+            <div class="player-controls-row">
+              <div class="player-controls-left">
+                <span class="player-control-btn play-btn" id="player-play-btn" onclick="togglePlay()">⏸</span>
+                <span class="player-control-btn" onclick="showToast('上一集')">⏮</span>
+                <span class="player-control-btn" onclick="showToast('下一集')">⏭</span>
+                <span class="player-speed-label" onclick="cycleSpeed()">1.0x</span>
+              </div>
+              <div class="player-controls-right">
+                <span class="player-control-btn" onclick="showToast('线路切换')">🔀</span>
+                <span class="player-control-btn" onclick="showEpisodeModal()">📋</span>
+                <span class="player-control-btn" onclick="showToast('全屏')">⛶</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="player-info-panel">
+          <div class="player-panel-section">
+            <h4 class="player-panel-title">切换线路</h4>
+            <div class="player-line-switch">
+              <span class="player-line-btn active">线路1</span>
+              <span class="player-line-btn">线路2</span>
+              <span class="player-line-btn">线路3</span>
+              <span class="player-line-btn">线路4</span>
+            </div>
+          </div>
+          <div class="player-panel-section">
+            <h4 class="player-panel-title">选集</h4>
+            <div class="player-episodes">
+              <div class="player-ep-item active">01</div>
+              <div class="player-ep-item">02</div>
+              <div class="player-ep-item">03</div>
+              <div class="player-ep-item">04</div>
+              <div class="player-ep-item">05</div>
+              <div class="player-ep-item">06</div>
+              <div class="player-ep-item">07</div>
+              <div class="player-ep-item">08</div>
+              <div class="player-ep-item">09</div>
+              <div class="player-ep-item">10</div>
+              <div class="player-ep-item">11</div>
+              <div class="player-ep-item">12</div>
+              <div class="player-ep-item">13</div>
+              <div class="player-ep-item">14</div>
+              <div class="player-ep-item">15</div>
+              <div class="player-ep-item">16</div>
+              <div class="player-ep-item">17</div>
+              <div class="player-ep-item">18</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 底部导航栏 4个tab ==================== -->
+    <nav id="tab-bar">
+      <div class="tab-item active" data-tab="home" onclick="switchTab('home')">
+        <span class="tab-icon">🏠</span>
+        <span class="tab-text">首页</span>
+      </div>
+      <div class="tab-item" data-tab="filter" onclick="switchTab('filter')">
+        <span class="tab-icon">🔎</span>
+        <span class="tab-text">筛选</span>
+      </div>
+      <div class="tab-item" data-tab="rank" onclick="switchTab('rank')">
+        <span class="tab-icon">🏆</span>
+        <span class="tab-text">排行榜</span>
+      </div>
+      <div class="tab-item" data-tab="mine" onclick="switchTab('mine')">
+        <span class="tab-icon">👤</span>
+        <span class="tab-text">我的</span>
+      </div>
+    </nav>
+
+    <!-- 播放页浮窗（不占tab） -->
+    <div class="floating-player" id="floating-player" onclick="showPlayer()">▶</div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- 搜索弹窗 -->
+    <div class="modal" id="search-modal" style="display:none;" onclick="if(event.target===this)closeSearchModal()">
+      <div class="modal-content" onclick="event.stopPropagation()" style="max-width:460px;">
+        <div class="modal-header">
+          <h3>🔍 搜索</h3>
+          <span class="modal-close" onclick="closeSearchModal()">✕</span>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="setting-input" id="search-modal-input" placeholder="搜索电影、电视剧、动漫..." style="margin-bottom:16px;">
+          <button class="auth-submit-btn" style="margin:0;" onclick="doSearch()">搜索</button>
+          <div style="margin-top:18px;">
+            <div style="font-size:13px;color:#666;font-weight:600;margin-bottom:10px;">🔥 热门搜索</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <span class="filter-chip" onclick="searchKeyword('庆余年')">庆余年</span>
+              <span class="filter-chip" onclick="searchKeyword('海贼王')">海贼王</span>
+              <span class="filter-chip" onclick="searchKeyword('蜡笔小新')">蜡笔小新</span>
+              <span class="filter-chip" onclick="searchKeyword('名侦探柯南')">名侦探柯南</span>
+              <span class="filter-chip" onclick="searchKeyword('流浪地球')">流浪地球</span>
+              <span class="filter-chip" onclick="searchKeyword('狂飙')">狂飙</span>
+              <span class="filter-chip" onclick="searchKeyword('甄嬛传')">甄嬛传</span>
+              <span class="filter-chip" onclick="searchKeyword('火影忍者')">火影忍者</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置弹窗（含服务器地址、退出登录） -->
+    <div class="modal" id="setting-modal" style="display:none;" onclick="if(event.target===this)closeSettingModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h3>⚙️ 设置</h3>
+          <span class="modal-close" onclick="closeSettingModal()">✕</span>
+        </div>
+        <div class="modal-body">
+          <label class="setting-label">服务器地址</label>
+          <p class="setting-desc">自定义服务器地址，留空则使用默认内置服务器</p>
+          <input type="text" class="setting-input" id="setting-server-input" placeholder="https://your-app.up.railway.app">
+          <button class="auth-submit-btn" style="margin:0 0 14px 0;" onclick="saveSettingServer()">保存服务器地址</button>
+          <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
+            <p class="setting-desc">当前服务器：<span id="setting-current-server" style="color:#ff6b6b;word-break:break-all;"></span></p>
+          </div>
+          <button class="auth-submit-btn" style="margin-top:16px;background:linear-gradient(135deg,#ff4444 0%,#cc0000 100%);" onclick="doLogout()">退出登录</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/js/config.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
