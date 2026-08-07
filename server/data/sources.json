@@ -1,0 +1,23 @@
+[
+  {
+    "key": "ffzy",
+    "name": "非凡资源",
+    "api": "https://cj.ffzyapi.com/api.php/provide/vod/from/ffm3u8/",
+    "playFrom": "ffm3u8",
+    "enabled": true
+  },
+  {
+    "key": "lzi",
+    "name": "量子资源",
+    "api": "https://cj.lziapi.com/api.php/provide/vod/from/lzm3u8/",
+    "playFrom": "lzm3u8",
+    "enabled": true
+  },
+  {
+    "key": "bfzy",
+    "name": "暴风资源",
+    "api": "https://bfzyapi.com/api.php/provide/vod/from/bfzym3u8/",
+    "playFrom": "bfzym3u8",
+    "enabled": true
+  }
+]
